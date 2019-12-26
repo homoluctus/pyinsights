@@ -1,0 +1,57 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "id": "version_1.0.json",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "version": {
+        "type": "string"
+      },
+      "log_group_name": {
+        "description": "The list of log groups to be queried. You can include up to 20 log groups.",
+        "type": "array",
+        "items": {
+            "type": "string"
+        },
+        "uniqueItems": true
+      },
+      "pattern": {
+        "description": "The query string to insights CloudWatch Logs.",
+        "type": "string"
+      },
+      "duration": {
+        "oneOf": [
+          {
+            "description": "The interval to query.",
+            "type": "string",
+            "pattern": "^[1-9]\\d+[hmds]$"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "start": {
+                "description": "The beginning of the time range to query.",
+                "type": "string",
+                "pattern": "[1-9]\\d{3}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}"
+              },
+              "end": {
+                "description": "The end of the time range to query.",
+                "type": "string",
+                "pattern": "[1-9]\\d{3}-\\d{2}-\\d{2}\\s\\d{2}:\\d{2}:\\d{2}"
+              }
+            }
+          }
+        ]
+      },
+      "limit": {
+        "type": "integer"
+      }
+    },
+    "required": [
+      "version",
+      "log_group_name",
+      "pattern",
+      "duration"
+    ]
+}
