@@ -24,7 +24,7 @@
           {
             "description": "The interval to query.",
             "type": "string",
-            "pattern": "^[1-9]\\d+[hmds]$"
+            "pattern": "^[1-9]\\d*[hmds]$"
           },
           {
             "type": "object",
