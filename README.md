@@ -11,7 +11,7 @@ write configuration to `pyinsights.yml` like:
 ```yaml
 version: '1.0'
 log_group_name:
-  - '/ecs/ecwms-bat'
+  - '/ecs/sample'
 pattern: 'field @message | filter @message like /ERROR/'
 duration: '30m'
 limit: 10

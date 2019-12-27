@@ -1,6 +1,6 @@
 version: '1.0'
 log_group_name:
-  - '/ecs/ecwms-bat'
+  - '/ecs/sample'
 query_string: 'parse @message /time:(?<time>.*)\tseverity:(?<severity>.*)\tmodule:(?<module>.*)\tlineno:(?<lineno>\d+)\tmessage:(?<msg>.*)/'
 duration: '30m'
 limit: 10
