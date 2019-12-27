@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyinsights"
-version = "0.1.0"
+version = "0.1.1"
 description = "AWS CloudWatch Logs Insights is wrapped by Python"
 authors = ["homoluctus <w.slife18sy@gmail.com>"]
 license = "MIT"
@@ -9,6 +9,7 @@ keywords = ["aws", "insights", "cli"]
 packages =[
   { include = "pyinsights" }
 ]
+repository = "https://github.com/homoluctus/pyinsights"
 
 [tool.poetry.dependencies]
 python = "^3.8"
