@@ -19,33 +19,10 @@ def query(params: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
         results {Dict[str, Any]}
     """
 
-    client = InsightsClient(**params['aws'])
-    client.start_query(**params['query'])
+    client = InsightsClient(region=params['region'], profile=params['profile'])
+    client.start_query(**params['config'])
     results = client.fetch_result()
     return results
-
-
-def wait_result(thread) -> Dict[str, Any]:
-    """Wait to get result
-
-    Arguments:
-        thread {[type]}
-
-    Returns:
-        results {Dict[str, Any]}
-    """
-
-    while True:
-        try:
-            results = thread.result(timeout=0.1)
-        except confu.TimeoutError:
-            processing('.', end='')
-            sleep(0.5)
-            pass
-        else:
-            if results:
-                processing('.', end='\n')
-                return results
 
 
 def run_thread(params: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
@@ -61,7 +38,18 @@ def run_thread(params: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
     with ThreadPoolExecutor(max_workers=1) as executor:
         thread = executor.submit(query, params)
         processing('Waiting', end=' ')
-        results = wait_result(thread)
+
+        while True:
+            try:
+                results = thread.result(timeout=0.1)
+            except confu.TimeoutError:
+                processing('.', end='')
+                sleep(0.5)
+                pass
+            else:
+                if results:
+                    processing('.', end='\n')
+                    break
 
     return results
 
@@ -83,16 +71,12 @@ def run(kwargs: Dict[str, str]) -> bool:
     if isinstance(duration, str):
         duration = get_times(duration)
     config.update(duration)
-    params = {
-        'aws': kwargs,
-        'query': config
-    }
+    kwargs.update({'config': config})
 
-    results = run_thread(params)
+    results = run_thread(kwargs)
 
     for result in results['results']:
-        for field in result:
-            print(json.dumps(field, indent=2, ensure_ascii=False), flush=True)
-            sleep(0.5)
+        print(json.dumps(result, indent=2, ensure_ascii=False), flush=True)
+        sleep(0.5)
 
     return True

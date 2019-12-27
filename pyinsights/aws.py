@@ -42,7 +42,7 @@ class InsightsClient:
 
     def start_query(
         self,
-        pattern: str,
+        query_string: str,
         start_time: Union[str, DatetimeType],
         end_time: Union[str, DatetimeType],
         log_group_name: List[str],
@@ -51,7 +51,7 @@ class InsightsClient:
         """Start query
 
         Arguments:
-            pattern {str} -- query string
+            query_string {str} -- query string
             start_time {Union[str, DatetimeType]}
                 -- datetime that format is `%Y-%m-%d %H:%M:%S`
             end_time {Union[str, DatetimeType]}
@@ -73,7 +73,7 @@ class InsightsClient:
             logGroupNames=log_group_name,
             startTime=start_time_epoch,
             endTime=end_time_epoch,
-            queryString=pattern,
+            queryString=query_string,
             limit=limit,
         )
 

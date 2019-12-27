@@ -42,7 +42,7 @@ time_unit_map = {
 def get_times(duration: str) -> Dict[str, DatetimeType]:
     try:
         unit = duration[-1]
-        duration = int(duration[:-1]) * -1
+        duration = int(duration[:-1])
         arg = {time_unit_map[unit]: duration}
     except (ValueError, IndexError, KeyError):
         raise InvalidDurationError(
@@ -50,7 +50,7 @@ def get_times(duration: str) -> Dict[str, DatetimeType]:
         )
 
     end_time = datetime.now()
-    start_time = end_time + timedelta(**arg)
+    start_time = end_time - timedelta(**arg)
     times = {'start_time': start_time, 'end_time': end_time}
     return times
 
