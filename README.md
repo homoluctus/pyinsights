@@ -12,7 +12,7 @@ write configuration to `pyinsights.yml` like:
 version: '1.0'
 log_group_name:
   - '/ecs/sample'
-pattern: 'field @message | filter @message like /ERROR/'
+query_string: 'field @message | filter @message like /ERROR/'
 duration: '30m'
 limit: 10
 ```
