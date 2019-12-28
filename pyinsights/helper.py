@@ -1,3 +1,4 @@
+import sys
 import random
 from datetime import datetime, timedelta
 from typing import Dict, Type, Union
@@ -98,8 +99,6 @@ def processing(msg: str, end: str = '') -> None:
         end {str} -- (default: {''})
     """
 
-    print(
-        f'{Accessory.Accent}{color()}{msg}{Accessory.End}',
-        flush=True,
-        end=end
-    )
+    processing_msg = f'{Accessory.Accent}{color()}{msg}{Accessory.End}{end}'
+    sys.stdout.write(processing_msg)
+    sys.stdout.flush()

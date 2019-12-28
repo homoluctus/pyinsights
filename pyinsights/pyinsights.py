@@ -1,3 +1,4 @@
+import sys
 import json
 from time import sleep
 import concurrent.futures as confu
@@ -74,9 +75,7 @@ def run(kwargs: Dict[str, str]) -> bool:
     kwargs.update({'config': config})
 
     results = run_thread(kwargs)
-
-    for result in results['results']:
-        print(json.dumps(result, indent=2, ensure_ascii=False), flush=True)
-        sleep(0.5)
+    json_results = json.dumps(results['results'], indent=2, ensure_ascii=False)
+    sys.stdout.write(json_results)
 
     return True
