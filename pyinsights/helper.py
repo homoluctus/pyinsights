@@ -1,7 +1,7 @@
 import sys
 import random
 from datetime import datetime, timedelta
-from typing import Dict, Type, Union
+from typing import Dict, List, Type, Union
 
 from pyinsights.exceptions import InvalidDurationError
 
@@ -102,3 +102,25 @@ def processing(msg: str, end: str = '') -> None:
     processing_msg = f'{Accessory.Accent}{color()}{msg}{Accessory.End}{end}'
     sys.stdout.write(processing_msg)
     sys.stdout.flush()
+
+
+def format_query_results(
+    results: List[List[Dict[str, str]]]
+) -> List[Dict[str, str]]:
+    """[summary]
+
+    Arguments:
+        results {List[List[Dict[str, str]]]} -- [description]
+
+    Returns:
+        List[Dict[str, str]] -- [description]
+    """
+
+    formatted_results = [
+        {
+            field['field']: field['value']
+            for field in result if field['field'] != '@ptr'
+        }
+        for result in results['results']
+    ]
+    return formatted_results

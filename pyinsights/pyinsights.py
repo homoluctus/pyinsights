@@ -7,7 +7,7 @@ from typing import Any, Dict
 
 from pyinsights.aws import InsightsClient
 from pyinsights.config import load_config, validate
-from pyinsights.helper import get_times, processing
+from pyinsights.helper import get_times, processing, format_query_results
 
 
 def query(params: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
@@ -75,7 +75,8 @@ def run(kwargs: Dict[str, str]) -> bool:
     kwargs.update({'config': config})
 
     results = run_thread(kwargs)
-    json_results = json.dumps(results['results'], indent=2, ensure_ascii=False)
-    sys.stdout.write(json_results)
+    formatted_result = format_query_results(results)
+    json_results = json.dumps(formatted_result, indent=2, ensure_ascii=False)
+    sys.stdout.write(f'{json_results}\n')
 
     return True
