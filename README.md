@@ -6,6 +6,10 @@
 
 A CLI tool To query CloudWatch Logs Insights.
 
+![usage1](https://github.com/homoluctus/pyinsights/tree/master/images/usage1.png)
+
+![usage2](https://github.com/homoluctus/pyinsights/tree/master/images/usage2.png)
+
 ## ToC
 
 - [Usage](#Usage)
