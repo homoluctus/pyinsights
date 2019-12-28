@@ -14,7 +14,7 @@ def parse_args() -> Dict[str, Any]:
     """
 
     parser = argparse.ArgumentParser(
-        prog='PyInsights',
+        prog='pyinsights',
         description='AWS CloudWatch Logs Insights is wrapped by Python',
     )
 
