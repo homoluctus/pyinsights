@@ -1,5 +1,4 @@
 import sys
-import json
 from time import sleep
 import concurrent.futures as confu
 from concurrent.futures.thread import ThreadPoolExecutor
@@ -7,7 +6,8 @@ from typing import Any, Dict
 
 from pyinsights.aws import InsightsClient
 from pyinsights.config import load_config, validate
-from pyinsights.helper import get_times, processing, format_query_results
+from pyinsights.formatter import format_result
+from pyinsights.helper import get_times, processing
 
 
 def query(params: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
@@ -65,18 +65,16 @@ def run(kwargs: Dict[str, str]) -> bool:
         bool
     """
 
-    config = load_config(kwargs.pop('config'))
+    format_type = kwargs.pop('format')
+    config = load_config(kwargs['config'])
     validate(config)
-
+    kwargs['config'] = config
     duration = config.pop('duration')
-    if isinstance(duration, str):
-        duration = get_times(duration)
-    config.update(duration)
-    kwargs.update({'config': config})
+    duration = get_times(duration)
+    kwargs['config'].update(duration)
 
     results = run_thread(kwargs)
-    formatted_result = format_query_results(results)
-    json_results = json.dumps(formatted_result, indent=2, ensure_ascii=False)
-    sys.stdout.write(f'{json_results}\n')
+    formatted_result = format_result(format_type, results['results'])
+    sys.stdout.write(formatted_result)
 
     return True

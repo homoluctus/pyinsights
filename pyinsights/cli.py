@@ -26,6 +26,14 @@ def parse_args() -> Dict[str, Any]:
         help='PyInsights config file path',
     )
 
+    parser.add_argument(
+        '-f',
+        '--format',
+        choices=['json', 'table'],
+        default='json',
+        help='Output format "json" or "table"'
+    )
+
     parser.add_argument('-p', '--profile', help='AWS profile name')
 
     parser.add_argument('-r', '--region', help='AWS region')

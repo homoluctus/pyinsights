@@ -1,7 +1,7 @@
 import sys
 import random
 from datetime import datetime, timedelta
-from typing import Dict, List, Type, Union
+from typing import Dict, Type, Union
 
 from pyinsights.exceptions import InvalidDurationError
 
@@ -40,7 +40,27 @@ time_unit_map = {
 }
 
 
-def get_times(duration: str) -> Dict[str, DatetimeType]:
+def get_times(
+    duration: Union[str, Dict[str, str]]
+) -> Dict[str, Union[str, DatetimeType]]:
+    """Get start_time and end_time
+
+    Arguments:
+        duration {Union[str, Dict[str, str]]}
+
+    Raises:
+        InvalidDurationError
+
+    Returns:
+        Dict[str, Union[str, DatetimeType]]
+    """
+
+    if isinstance(duration, Dict):
+        return {
+            'start_time': duration['start_time'],
+            'end_time': duration['end_time']
+        }
+
     try:
         unit = duration[-1]
         duration = int(duration[:-1])
@@ -52,8 +72,10 @@ def get_times(duration: str) -> Dict[str, DatetimeType]:
 
     end_time = datetime.now()
     start_time = end_time - timedelta(**arg)
-    times = {'start_time': start_time, 'end_time': end_time}
-    return times
+    return {
+        'start_time': start_time,
+        'end_time': end_time
+    }
 
 
 def color() -> str:
@@ -102,25 +124,3 @@ def processing(msg: str, end: str = '') -> None:
     processing_msg = f'{Accessory.Accent}{color()}{msg}{Accessory.End}{end}'
     sys.stdout.write(processing_msg)
     sys.stdout.flush()
-
-
-def format_query_results(
-    results: List[List[Dict[str, str]]]
-) -> List[Dict[str, str]]:
-    """[summary]
-
-    Arguments:
-        results {List[List[Dict[str, str]]]} -- [description]
-
-    Returns:
-        List[Dict[str, str]] -- [description]
-    """
-
-    formatted_results = [
-        {
-            field['field']: field['value']
-            for field in result if field['field'] != '@ptr'
-        }
-        for result in results['results']
-    ]
-    return formatted_results
