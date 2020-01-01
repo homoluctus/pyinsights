@@ -46,7 +46,9 @@ def convert_to_epoch(duration: Union[str, DatetimeType]) -> int:
 TIME_UNITS = {
     's': 'seconds',
     'm': 'minutes',
-    'h': 'hours'
+    'h': 'hours',
+    'd': 'days',
+    'w': 'weeks'
 }
 
 
