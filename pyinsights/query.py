@@ -53,8 +53,6 @@ class InsightsClient:
 
         self.__client = session.client('logs')
         self.__query_id = None
-        self.__stop_request = False
-        self.__is_stopped = Event()
 
     def start_query(
         self,
@@ -105,19 +103,13 @@ class InsightsClient:
             results {QueryResultResponse}
         """
 
-        self.__is_stopped.clear()
-
         if self.__query_id is None:
             raise QueryNotYetStartError('The Query has not yet started')
 
         results = self.__client.get_query_results(queryId=self.__query_id)
         status = results['status']
 
-        if self.__stop_request:
-            self.end_query()
-            self.__is_stopped.set()
-
-        elif status in ['Scheduled', 'Running']:
+        if status in ['Scheduled', 'Running']:
             sleep(wait_time)
             results.update(self.fetch_result())
 
@@ -161,10 +153,6 @@ class InsightsClient:
         except Exception as err:
             raise err
 
-    def terminate(self):
-        self._stop_request = True
-        self.__is_stopped.wait()
-
 
 def query(
     region: str,
@@ -185,24 +173,24 @@ def query(
     results = {}
     processing('Waiting', end=' ')
 
-    with ThreadPoolExecutor(max_workers=1) as executor:
-        client = InsightsClient(region, profile)
-        client.start_query(**query_params)
-        thread = executor.submit(client.fetch_result)
+    client = InsightsClient(region, profile)
+    client.start_query(**query_params)
 
-        try:
+    try:
+        with ThreadPoolExecutor(max_workers=1) as executor:
+            thread = executor.submit(client.fetch_result)
+
             while True:
                 try:
-                    results = thread.result(timeout=0.1)
+                    results = thread.result(timeout=0.5)
                 except confu.TimeoutError:
                     processing('.', end='')
-                    sleep(0.5)
                 else:
                     if results:
                         processing('.', end='\n')
                         break
-        except KeyboardInterrupt:
-            client.terminate()
-            sys.exit('Abort')
-
-    return results
+    except KeyboardInterrupt:
+        client.end_query()
+        sys.exit('\nAbort')
+    else:
+        return results
