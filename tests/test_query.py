@@ -4,7 +4,8 @@ from datetime import datetime, timedelta
 import pytest
 from botocore.exceptions import ParamValidationError
 
-from pyinsights.aws import InsightsClient
+from pyinsights.query import InsightsClient
+from pyinsights.helper import convert_to_epoch
 
 
 LOG_GROUP_NAME = os.getenv('LOG_GROUP_NAME')
@@ -22,7 +23,8 @@ class TestInsightsClient:
     @pytest.fixture()
     def times(self):
         end_time = datetime.now()
-        start_time = end_time + timedelta(minutes=-10)
+        start_time = convert_to_epoch(end_time + timedelta(minutes=-10))
+        end_time = convert_to_epoch(end_time)
         return (start_time, end_time)
 
     @pytest.fixture()
@@ -44,10 +46,10 @@ class TestInsightsClient:
         result = client.end_query()
         assert result is True
 
-    def test_invalid_parameter(self, client, times):
+    def test_invalid_log_group_name(self, client, times, query_string):
         with pytest.raises(ParamValidationError):
             client.start_query(
-                query_string='12345678',
+                query_string=query_string,
                 start_time=times[0],
                 end_time=times[1],
                 log_group_name='invalid',
