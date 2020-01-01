@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from pyinsights.pyinsights import run
+from pyinsights.cli import run
 
 
 CONFIG_FILEPATH_FOR_TEST = os.getenv('CONFIG_FILEPATH_FOR_TEST')

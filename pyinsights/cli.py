@@ -1,9 +1,14 @@
 import argparse
-from typing import Any, Dict
+from typing import Any, Dict, Type
 import sys
 
-from pyinsights import __version__
-from pyinsights.pyinsights import run
+from pyinsights.__version__ import __version__
+from pyinsights.config import load_config
+from pyinsights.query import query
+from pyinsights.formatter import format_result
+
+
+CliOptions = Type[Dict[str, Any]]
 
 
 def parse_args() -> Dict[str, Any]:
@@ -45,6 +50,22 @@ def parse_args() -> Dict[str, Any]:
     return vars(parser.parse_args())
 
 
-def cli() -> bool:
+def run(cli_options: CliOptions) -> bool:
+    config = load_config(cli_options['config'])
+    tmp_result = query(
+        cli_options['region'],
+        cli_options['profile'],
+        config.get_query_params()
+    )
+
+    if isinstance(tmp_result, dict) and (results := tmp_result.get('results')):
+        formatted_result = format_result(cli_options['format'], results)
+        sys.stdout.write(formatted_result)
+        return True
+
+    return False
+
+
+def main() -> bool:
     args = parse_args()
     sys.exit(run(args))

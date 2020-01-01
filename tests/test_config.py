@@ -10,9 +10,10 @@ from pyinsights.exceptions import (
 
 class TestLoadConfig:
     def test_existing_config(self):
-        result = load_config('examples/pyinsights1.yml')
-        assert isinstance(result, dict) is True
-        assert result.get('version') is not None
+        filepath = 'examples/pyinsights1.yml'
+        config = load_config(filepath)
+        assert config.filename == filepath
+        assert isinstance(config.version, str) is True
 
     def test_non_existing_config(self):
         with pytest.raises(ConfigNotFoundError):
@@ -36,15 +37,15 @@ class TestValidator:
         return load_config('examples/pyinsights1.yml')
 
     def test_valid_config(self, config):
-        result = validate(config)
+        result = validate(config.content, config.version)
         assert result is True
 
     def test_invalid_version(self, config):
-        config['version'] = 'invalid'
+        config.content['version'] = 'invalid'
         with pytest.raises(InvalidVersionError):
-            validate(config)
+            validate(config.content, config.version)
 
     def test_invalid_config_content(self, config):
-        config['test'] = 'this is test'
+        config.content['test'] = 'this is test'
         with pytest.raises(ConfigInvalidSyntaxError):
-            validate(config)
+            validate(config.content, config.version)

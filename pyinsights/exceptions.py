@@ -6,6 +6,14 @@ class NotFetchQueryResultError(Exception):
     """Raises error if the query result could not be fetched"""
 
 
+class QueryTimeoutError(Exception):
+    """Raises timeout error if the query timeout"""
+
+
+class QueryAlreadyCancelled(Exception):
+    """Raises if the query has already been cancelled"""
+
+
 class ConfigInvalidSyntaxError(Exception):
     """Raises error if the configuration is invalid syntax"""
 

@@ -9,73 +9,78 @@ from pyinsights.exceptions import InvalidDurationError
 DatetimeType = Type[datetime]
 
 
-def convert_epoch(time: Union[str, DatetimeType]) -> int:
-    """Convert datetime string to epoch (unix timestamp)
+def convert_to_epoch(duration: Union[str, DatetimeType]) -> int:
+    """Convert datetime string to epoch (POSIX timestamp)
 
     Arguments:
-        time {Union[str, DatetimeType]}
-            -- datetime string that format is `%Y-%m-%d %H:%M:%S`
+        duration {Union[str, DatetimeType]}
+            --  string format must be `%Y-%m-%d %H:%M:%S`
+                if duration type is str
+
+    Raises:
+        InvalidDurationError
 
     Returns:
         epoch {int}
     """
 
-    if isinstance(time, str):
+    if isinstance(duration, str):
         time_format = '%Y-%m-%d %H:%M:%S'
         try:
-            time = datetime.strptime(time, time_format)
+            duration = datetime.strptime(duration, time_format)
         except ValueError:
             raise InvalidDurationError(
-                f'{repr(time)} is invalid as duration parameter'
+                f'{duration=} is invalid datetime format as \
+                    duration parameter'
             )
 
-    epoch = int(time.timestamp())
+    if not isinstance(duration, datetime):
+        raise InvalidDurationError(
+            f'Cloud not convert {duration=} to POSIX timestamp'
+        )
+
+    epoch = int(duration.timestamp())
     return epoch
 
 
-time_unit_map = {
+TIME_UNITS = {
     's': 'seconds',
     'm': 'minutes',
     'h': 'hours'
 }
 
 
-def get_times(
-    duration: Union[str, Dict[str, str]]
-) -> Dict[str, Union[str, DatetimeType]]:
-    """Get start_time and end_time
+def convert_string_duration_to_datetime(
+    string_duration: str
+) -> Dict[str, DatetimeType]:
+    """Convert string duration to datetime
 
     Arguments:
-        duration {Union[str, Dict[str, str]]}
+        string_duration {str}
 
     Raises:
         InvalidDurationError
 
     Returns:
-        Dict[str, Union[str, DatetimeType]]
+        Dict[str, DatetimeType] -- `start_time` and `end_time` are key
     """
 
-    if isinstance(duration, Dict):
-        return {
-            'start_time': duration['start_time'],
-            'end_time': duration['end_time']
-        }
-
     try:
-        unit = duration[-1]
-        duration = int(duration[:-1])
-        arg = {time_unit_map[unit]: duration}
+        duration = {
+            TIME_UNITS[string_duration[-1]]: int(string_duration[:-1])
+        }
     except (ValueError, IndexError, KeyError):
         raise InvalidDurationError(
-            f'{repr(duration)} is invalid as duration parameter'
+            f'{string_duration=} is invalid as duration parameter'
         )
 
     end_time = datetime.now()
-    start_time = end_time - timedelta(**arg)
-    return {
+    start_time = end_time - timedelta(**duration)
+    duraion_map = {
         'start_time': start_time,
         'end_time': end_time
     }
+    return duraion_map
 
 
 def color() -> str:
@@ -118,7 +123,7 @@ def processing(msg: str, end: str = '') -> None:
         msg {str}
 
     Keyword Arguments:
-        end {str} -- (default: {''})
+        end {str} - - (default: {''})
     """
 
     processing_msg = f'{Accessory.Accent}{color()}{msg}{Accessory.End}{end}'

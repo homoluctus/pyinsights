@@ -1,6 +1,8 @@
 import json
+from dataclasses import dataclass, asdict
+from functools import cached_property
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, List, NamedTuple, Union
 
 from jsonschema import Draft7Validator
 from jsonschema.exceptions import ValidationError
@@ -12,14 +14,72 @@ from pyinsights.exceptions import (
     ConfigVersionUnknownError,
     InvalidVersionError
 )
+from pyinsights.helper import (
+    convert_to_epoch,
+    convert_string_duration_to_datetime,
+    DatetimeType
+)
 
 
 ConfigType = Dict[str, Any]
 SchemaType = Dict[str, Any]
 
 
+class ConfigFile(NamedTuple):
+    filename: str
+    content: ConfigType
+
+    @classmethod
+    def from_filename(cls, filename) -> 'ConfigFile':
+        return cls(filename, load_yaml(filename))
+
+    @property
+    def version(self) -> str:
+        try:
+            return self.content['version']
+        except KeyError:
+            raise ConfigVersionUnknownError(
+                'Please Specify configuration version'
+            )
+
+    def convert_duration(self) -> Dict[str, int]:
+        duration = self.content['duration']
+
+        if isinstance(duration, str):
+            duration = convert_string_duration_to_datetime(duration)
+
+        duration_epoch = {
+            key: convert_to_epoch(value)
+            for key, value in duration.items()
+        }
+        return duration_epoch
+
+    def get_query_params(self) -> ConfigType:
+        params = self.content.copy()
+        new_duration = self.convert_duration()
+        del params['version']
+        del params['duration']
+        params.update(new_duration)
+        return params
+
+
 def load_config(filepath: str) -> ConfigType:
-    """Load the configuration file
+    """Load configuration
+
+    Arguments:
+        filepath {str}
+
+    Returns:
+        {ConfigType} -- query parameters
+    """
+
+    config = ConfigFile.from_filename(filepath)
+    validate(config.content, config.version)
+    return config
+
+
+def load_yaml(filepath: str) -> ConfigType:
+    """Load YAML configuration file
 
     Arguments:
         filepath {str}
@@ -33,9 +93,7 @@ def load_config(filepath: str) -> ConfigType:
 
     try:
         with open(filepath) as fd:
-            config = safe_load(fd)
-
-        return config
+            return safe_load(fd)
     except FileNotFoundError:
         raise ConfigNotFoundError('Could not find the configuration')
 
@@ -59,21 +117,19 @@ def load_schema(version: str) -> SchemaType:
 
     try:
         with open(schema_filpath) as fd:
-            schema = json.load(fd)
-
-        return schema
+            return json.load(fd)
     except FileNotFoundError:
         raise InvalidVersionError(f'The version {repr(version)} is invalid')
 
 
-def validate(config: ConfigType) -> bool:
+def validate(config: ConfigType, version: str) -> bool:
     """Validate the configuration
 
     Arguments:
         config {ConfigType}
+        version {str}
 
     Raises:
-        ConfigVersionUnknownError
         ConfigInvalidSyntaxError
 
     Returns:
@@ -81,16 +137,11 @@ def validate(config: ConfigType) -> bool:
     """
 
     try:
-        version = config['version']
-    except KeyError:
-        raise ConfigVersionUnknownError('Please specify the version')
-
-    schema = load_schema(version)
-
-    try:
+        schema = load_schema(version)
         Draft7Validator(schema).validate(config)
-        config.pop('version')
     except ValidationError as err:
         raise ConfigInvalidSyntaxError(err)
+    except Exception as err:
+        raise err
     else:
         return True
