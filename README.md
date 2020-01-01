@@ -50,7 +50,7 @@ pyinsights -c pyinsights.yml -p aws_profile -r region
 |log_group_name|array|true|Target log group names to query|
 |query_string|string|true|Pattern to query|
 |duration|string or object|true||
-||string||Specify hours, minutes or seconds from now<br>Unit: hours = `h`, minutes = `m`, seconds = `s`|
+||string||Specify hours, minutes or seconds from now<br>Unit: hours = `h`, minutes = `m`, seconds = `s`, days = `d`, weeks = `w`|
 ||object||Specify `start_time` and `end_time`<br>Datetime format must be `YYYY-MM-DD HH:MM:SS`|
 |limit|integer|false|The number of log to fetch|
 
