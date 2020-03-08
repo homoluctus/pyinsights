@@ -22,6 +22,7 @@ pytest = "^5.3"
 mypy = "^0.761"
 autopep8 = "^1.4.4"
 pycodestyle = {git = "https://github.com/PyCQA/pycodestyle.git", rev = "master"}
+flake8 = "^3.7.9"
 
 [tool.poetry.scripts]
 pyinsights = "pyinsights.cli:main"
