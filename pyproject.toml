@@ -20,9 +20,30 @@ pyyaml = "^5.2"
 [tool.poetry.dev-dependencies]
 pytest = "^5.3"
 mypy = "^0.761"
-autopep8 = "^1.4.4"
-pycodestyle = {git = "https://github.com/PyCQA/pycodestyle.git", rev = "master"}
-flake8 = "^3.7.9"
+pytest-cov = "^2.8.1"
+pylint = "^2.4.4"
+black = {git = "https://github.com/psf/black.git", rev = "master"}
+
+[tool.black]
+line-length = 100
+target-version = ['py38']
+include = '\.pyi?$'
+exclude = '''
+(
+  /(
+      \.eggs         # exclude a few common directories in the
+    | \.git          # root of the project
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+  )/
+)
+'''
 
 [tool.poetry.scripts]
 pyinsights = "pyinsights.cli:main"
