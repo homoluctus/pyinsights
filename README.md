@@ -10,14 +10,18 @@ A CLI tool To query CloudWatch Logs Insights.
 
 ![usage2](https://raw.githubusercontent.com/homoluctus/pyinsights/master/images/usage2.png)
 
-## ToC
+# ToC
 
-- [Usage](#Usage)
-  - [Write Configuration](#Write%20Configuration)
-  - [Execute command](#Execute%20command)
-- [Configuration](#Configuration)
-- [CLI Options](#CLI%20Options)
-- [Environment Variable](#Environment%20Variable)
+<!-- TOC depthFrom:2 -->
+
+- [Usage](#usage)
+  - [Write Configuration](#write-configuration)
+  - [Execute command](#execute-command)
+- [Configuration](#configuration)
+- [CLI Options](#cli-options)
+- [Environment Variable](#environment-variable)
+
+<!-- /TOC -->
 
 ## Usage
 
