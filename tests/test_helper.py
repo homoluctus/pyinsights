@@ -5,7 +5,6 @@ import pytest
 
 from pyinsights.exceptions import InvalidDurationError
 from pyinsights.helper import (
-    color,
     convert_to_epoch,
     convert_string_duration_to_datetime,
 )
@@ -53,9 +52,3 @@ def test_convert_string_duration_to_datetime_with_invalid_arg(
 ) -> None:
     with pytest.raises(exception):
         convert_string_duration_to_datetime(invalid_arg)
-
-
-def test_color() -> None:
-    result = color()
-    assert result.startswith("\033[") is True
-    assert result.endswith("m") is True

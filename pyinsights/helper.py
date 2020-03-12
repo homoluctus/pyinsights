@@ -1,5 +1,5 @@
 import sys
-import random
+from random import randint
 from datetime import datetime, timedelta
 from typing import Dict, Union
 
@@ -77,37 +77,50 @@ def convert_string_duration_to_datetime(
     return duraion_map
 
 
-def color() -> str:
-    """Choice a color
-
-    Returns:
-        str
-    """
-
-    colors = [
-        Color.Red,
-        Color.Green,
-        Color.Yellow,
-        Color.Blue,
-        Color.Purple,
-        Color.Cyan,
-    ]
-    choiced_color = random.choice(colors)
-    return choiced_color
-
-
 class Color:
-    Red = "\033[31m"
-    Green = "\033[32m"
-    Yellow = "\033[33m"
-    Blue = "\033[34m"
-    Purple = "\033[35m"
-    Cyan = "\033[36m"
+    @classmethod
+    def ansi(cls, code: Union[str, int]) -> str:
+        """Get ansi
 
+        Arguments:
+            code {Union[str, int]}
 
-class Accessory:
-    End = "\033[0m"
-    Accent = "\033[01m"
+        Returns:
+            str
+        """
+
+        return f"\033[{code}m"
+
+    @classmethod
+    def select_color_randomly(cls) -> str:
+        """Select a color randomly
+
+        Returns:
+            str
+        """
+
+        code = randint(1, 6)
+        return cls.ansi(30 + code)
+
+    @classmethod
+    def disabled(cls) -> str:
+        """Disable color
+
+        Returns:
+            str
+        """
+
+        return cls.ansi("0")
+
+    @classmethod
+    def bold(cls) -> str:
+        """Get bold code
+
+        Returns:
+            str
+        """
+
+        return cls.ansi("01")
 
 
 def processing(msg: str, end: str = "") -> None:
@@ -117,9 +130,9 @@ def processing(msg: str, end: str = "") -> None:
         msg {str}
 
     Keyword Arguments:
-        end {str} - - (default: {''})
+        end {str} -- (default: {''})
     """
 
-    processing_msg = f"{Accessory.Accent}{color()}{msg}{Accessory.End}{end}"
+    processing_msg = f"{Color.bold()}{Color.select_color_randomly()}{msg}{Color.disabled()}{end}"
     sys.stdout.write(processing_msg)
     sys.stdout.flush()
