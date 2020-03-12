@@ -1,13 +1,13 @@
 import json
 import shutil
-from typing import Dict, List, Type
+from typing import Dict, List
 
 
-QueryResult = Type[List[List[Dict[str, str]]]]
+QueryResult = List[List[Dict[str, str]]]
 
 
 class Formatter:
-    def __init__(self, format_type: str = 'json') -> None:
+    def __init__(self, format_type: str = "json") -> None:
         """
         Keyword Arguments:
             format_type {str} -- [description] (default: {'json'})
@@ -26,8 +26,9 @@ class Formatter:
 
         formatted_result = [
             {
-                field['field']: field['value']
-                for field in result if field['field'] != '@ptr'
+                field["field"]: field["value"]
+                for field in result
+                if field["field"] != "@ptr"
             }
             for result in results
         ]
@@ -44,7 +45,7 @@ class Formatter:
         """
 
         if not results:
-            return ''
+            return ""
 
         tmp_resuls = self._to_pretty_dict(results)
         formatted_result = json.dumps(tmp_resuls, indent=2, ensure_ascii=False)
@@ -61,32 +62,30 @@ class Formatter:
         """
 
         if not results:
-            return ''
+            return ""
 
         tmp_results = self._to_pretty_dict(results)
         headers = list(tmp_results[0].keys())
         width, _ = shutil.get_terminal_size()
         length_per_column = width // len(headers)
 
-        table_header = ''
+        table_header = ""
         for header in headers:
             table_header += header.ljust(length_per_column)
 
-        table_record = ''
+        table_record = ""
         for result in tmp_results:
             for field in result.values():
-                table_record += \
-                    field[:length_per_column - 2].ljust(length_per_column)
-            table_record += '\n'
+                table_record += field[: length_per_column - 2].ljust(
+                    length_per_column
+                )
+            table_record += "\n"
 
-        formatted_result = f'{table_header}\n{table_record}'
+        formatted_result = f"{table_header}\n{table_record}"
         return formatted_result
 
 
-def format_result(
-    format_type: str,
-    results: QueryResult
-) -> str:
+def format_result(format_type: str, results: QueryResult) -> str:
     """Format the query result
 
     Arguments:
@@ -98,6 +97,6 @@ def format_result(
     """
 
     formatter = Formatter(format_type)
-    func = getattr(formatter, f'to_{format_type}')
+    func = getattr(formatter, f"to_{format_type}")
     formatted_result = func(results)
     return formatted_result
