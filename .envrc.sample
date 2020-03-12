@@ -1,0 +1,5 @@
+export STAGE
+export LOG_GROUP_NAME=
+export CONFIG_FILEPATH_FOR_TEST=
+export PROFILE_FOR_TEST=
+export REGION_FOR_TEST=
