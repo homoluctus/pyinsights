@@ -14,7 +14,8 @@ class Formatter:
         """
         self.format_type = format_type
 
-    def _to_pretty_dict(self, results: QueryResult) -> List[Dict[str, str]]:
+    @staticmethod
+    def _to_pretty_dict(results: QueryResult) -> List[Dict[str, str]]:
         """Format results to python dict in list
 
         Arguments:

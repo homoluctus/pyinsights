@@ -19,7 +19,8 @@ def parse_args() -> Dict[str, Any]:
     """
 
     parser = argparse.ArgumentParser(
-        prog="pyinsights", description="AWS CloudWatch Logs Insights is wrapped by Python",
+        prog="pyinsights",
+        description="AWS CloudWatch Logs Insights is wrapped by Python",
     )
 
     parser.add_argument(
@@ -42,17 +43,23 @@ def parse_args() -> Dict[str, Any]:
 
     parser.add_argument("-r", "--region", help="AWS region")
 
-    parser.add_argument("-v", "--version", action="version", version=__version__)
+    parser.add_argument(
+        "-v", "--version", action="version", version=__version__
+    )
 
     return vars(parser.parse_args())
 
 
 def run(cli_options: CliOptions) -> bool:
     config = load_config(cli_options["config"])
-    tmp_result = query(cli_options["region"], cli_options["profile"], config.get_query_params())
+    tmp_result = query(
+        cli_options["region"],
+        cli_options["profile"],
+        config.get_query_params(),
+    )
 
     if isinstance(tmp_result, dict) and (results := tmp_result.get("results")):
-        formatted_result = format_result(cli_options["format"], results)
+        formatted_result = format_result(cli_options["format"], results)  # type: ignore
         sys.stdout.write(formatted_result)
         return True
 

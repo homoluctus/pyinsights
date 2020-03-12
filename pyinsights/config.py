@@ -13,7 +13,10 @@ from pyinsights.exceptions import (
     ConfigVersionUnknownError,
     InvalidVersionError,
 )
-from pyinsights.helper import convert_to_epoch, convert_string_duration_to_datetime
+from pyinsights.helper import (
+    convert_to_epoch,
+    convert_string_duration_to_datetime,
+)
 
 
 ConfigType = Dict[str, Any]
@@ -34,7 +37,9 @@ class ConfigFile:
         try:
             return self.content["version"]
         except KeyError:
-            raise ConfigVersionUnknownError("Please Specify configuration version")
+            raise ConfigVersionUnknownError(
+                "Please Specify configuration version"
+            )
 
     def convert_duration(self) -> Dict[str, int]:
         duration = self.content["duration"]
@@ -42,7 +47,9 @@ class ConfigFile:
         if isinstance(duration, str):
             duration = convert_string_duration_to_datetime(duration)
 
-        duration_epoch = {key: convert_to_epoch(value) for key, value in duration.items()}
+        duration_epoch = {
+            key: convert_to_epoch(value) for key, value in duration.items()
+        }
         return duration_epoch
 
     def get_query_params(self) -> ConfigType:
