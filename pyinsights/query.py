@@ -1,3 +1,5 @@
+# pylint: disable=R0913
+
 import os
 import sys
 from time import sleep
