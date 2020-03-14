@@ -1,51 +1,58 @@
+from typing import Any
+
 import pytest
 
-from pyinsights.config import load_config, load_schema, validate
+from pyinsights.config import load_config, load_schema, validate, ConfigFile
 from pyinsights.exceptions import (
     ConfigInvalidSyntaxError,
     ConfigNotFoundError,
-    InvalidVersionError
+    InvalidVersionError,
 )
 
-
-class TestLoadConfig:
-    def test_existing_config(self):
-        filepath = 'examples/pyinsights1.yml'
-        config = load_config(filepath)
-        assert config.filename == filepath
-        assert isinstance(config.version, str) is True
-
-    def test_non_existing_config(self):
-        with pytest.raises(ConfigNotFoundError):
-            load_config('invalid')
+from tests.utils import does_not_raise
 
 
-class TestLoadSchema:
-    def test_existing_schema(self):
-        existing_version = '1.0'
-        result = load_schema(existing_version)
-        assert isinstance(result, dict) is True
+@pytest.mark.parametrize(
+    "filepath, expectation",
+    (
+        ("examples/pyinsights1.yml", does_not_raise()),
+        ("invalid", pytest.raises(ConfigNotFoundError)),
+    ),
+)
+def test_load_config(filepath: str, expectation: Any) -> None:
+    with expectation:
+        assert isinstance(load_config(filepath), ConfigFile) is True
 
-    def test_non_existing_schema_version(self):
-        with pytest.raises(InvalidVersionError):
-            load_schema('invalid')
+
+@pytest.mark.parametrize(
+    "version, expectation",
+    (
+        ("1.0", does_not_raise()),
+        ("invalid", pytest.raises(InvalidVersionError)),
+    ),
+)
+def test_load_schema(version: str, expectation: Any) -> None:
+    with expectation:
+        assert isinstance(load_schema(version), dict) is True
 
 
-class TestValidator:
-    @pytest.fixture()
-    def config(self):
-        return load_config('examples/pyinsights1.yml')
+def test_valid_config() -> None:
+    config = load_config("examples/pyinsights1.yml")
+    result = validate(config.content, config.version)
+    assert result is True
 
-    def test_valid_config(self, config):
-        result = validate(config.content, config.version)
-        assert result is True
 
-    def test_invalid_version(self, config):
-        config.content['version'] = 'invalid'
-        with pytest.raises(InvalidVersionError):
-            validate(config.content, config.version)
-
-    def test_invalid_config_content(self, config):
-        config.content['test'] = 'this is test'
-        with pytest.raises(ConfigInvalidSyntaxError):
-            validate(config.content, config.version)
+@pytest.mark.parametrize(
+    "key, invalid_value, exception",
+    (
+        ("version", "invalid", InvalidVersionError),
+        ("test", "this is test", ConfigInvalidSyntaxError),
+    ),
+)
+def test_invalid_config(
+    key: str, invalid_value: str, exception: Exception
+) -> None:
+    config = load_config("examples/pyinsights1.yml")
+    config.content[key] = invalid_value
+    with pytest.raises(exception):
+        validate(config.content, config.version)

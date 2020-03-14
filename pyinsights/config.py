@@ -1,8 +1,7 @@
 import json
-from dataclasses import dataclass, asdict
-from functools import cached_property
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, NamedTuple, Union
+from typing import Any, Dict
 
 from jsonschema import Draft7Validator
 from jsonschema.exceptions import ValidationError
@@ -12,12 +11,11 @@ from pyinsights.exceptions import (
     ConfigInvalidSyntaxError,
     ConfigNotFoundError,
     ConfigVersionUnknownError,
-    InvalidVersionError
+    InvalidVersionError,
 )
 from pyinsights.helper import (
     convert_to_epoch,
     convert_string_duration_to_datetime,
-    DatetimeType
 )
 
 
@@ -25,52 +23,52 @@ ConfigType = Dict[str, Any]
 SchemaType = Dict[str, Any]
 
 
-class ConfigFile(NamedTuple):
+@dataclass
+class ConfigFile:
     filename: str
     content: ConfigType
 
     @classmethod
-    def from_filename(cls, filename) -> 'ConfigFile':
+    def from_filename(cls, filename: str) -> "ConfigFile":
         return cls(filename, load_yaml(filename))
 
     @property
     def version(self) -> str:
         try:
-            return self.content['version']
+            return self.content["version"]
         except KeyError:
             raise ConfigVersionUnknownError(
-                'Please Specify configuration version'
+                "Please Specify configuration version"
             )
 
     def convert_duration(self) -> Dict[str, int]:
-        duration = self.content['duration']
+        duration = self.content["duration"]
 
         if isinstance(duration, str):
             duration = convert_string_duration_to_datetime(duration)
 
         duration_epoch = {
-            key: convert_to_epoch(value)
-            for key, value in duration.items()
+            key: convert_to_epoch(value) for key, value in duration.items()
         }
         return duration_epoch
 
     def get_query_params(self) -> ConfigType:
         params = self.content.copy()
         new_duration = self.convert_duration()
-        del params['version']
-        del params['duration']
+        del params["version"]
+        del params["duration"]
         params.update(new_duration)
         return params
 
 
-def load_config(filepath: str) -> ConfigType:
+def load_config(filepath: str) -> ConfigFile:
     """Load configuration
 
     Arguments:
         filepath {str}
 
     Returns:
-        {ConfigType} -- query parameters
+        {ConfigFile} -- query parameters
     """
 
     config = ConfigFile.from_filename(filepath)
@@ -92,10 +90,10 @@ def load_yaml(filepath: str) -> ConfigType:
     """
 
     try:
-        with open(filepath) as fd:
-            return safe_load(fd)
+        with open(filepath) as fobj:
+            return safe_load(fobj)
     except FileNotFoundError:
-        raise ConfigNotFoundError('Could not find the configuration')
+        raise ConfigNotFoundError("Could not find the configuration")
 
 
 def load_schema(version: str) -> SchemaType:
@@ -112,14 +110,14 @@ def load_schema(version: str) -> SchemaType:
     """
 
     basepath = Path(__file__).parent.resolve()
-    filename = f'version_{version}.json'
-    schema_filpath = f'{basepath}/schema/{filename}'
+    filename = f"version_{version}.json"
+    schema_filpath = f"{basepath}/schema/{filename}"
 
     try:
-        with open(schema_filpath) as fd:
-            return json.load(fd)
+        with open(schema_filpath) as fobj:
+            return json.load(fobj)
     except FileNotFoundError:
-        raise InvalidVersionError(f'The version {repr(version)} is invalid')
+        raise InvalidVersionError(f"The version {repr(version)} is invalid")
 
 
 def validate(config: ConfigType, version: str) -> bool:

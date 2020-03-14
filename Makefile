@@ -12,4 +12,4 @@ test:
 
 .PHONY: mypy
 mypy:
-	poetry run mypy pyinsights/
+	poetry run mypy pyinsights/ tests/

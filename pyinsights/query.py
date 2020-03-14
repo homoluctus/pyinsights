@@ -1,10 +1,11 @@
+# pylint: disable=R0913
+
 import os
 import sys
 from time import sleep
-from threading import Event
 import concurrent.futures as confu
 from concurrent.futures.thread import ThreadPoolExecutor
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import Any, Dict, List, Optional
 
 import boto3
 import botocore.errorfactory
@@ -14,27 +15,22 @@ from pyinsights.exceptions import (
     NotFetchQueryResultError,
     QueryAlreadyCancelled,
     QueryNotYetStartError,
-    QueryTimeoutError
+    QueryTimeoutError,
 )
-from pyinsights.helper import (
-    DatetimeType,
-    processing
-)
+from pyinsights.helper import processing
 
 
-AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-AWS_DEFAULT_REGION = os.getenv('AWS_DEFAULT_REGION')
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION")
 
 
-QueryResultResponse = Type[Dict[str, Any]]
+QueryResultResponse = Dict[str, Any]
 
 
 class InsightsClient:
     def __init__(
-        self,
-        region: Optional[str] = None,
-        profile: Optional[str] = None,
+        self, region: Optional[str] = None, profile: Optional[str] = None,
     ) -> None:
         """
         Keyword Arguments:
@@ -51,7 +47,7 @@ class InsightsClient:
             profile_name=profile,
         )
 
-        self.__client = session.client('logs')
+        self.__client = session.client("logs")
         self.__query_id = None
 
     def start_query(
@@ -86,7 +82,7 @@ class InsightsClient:
             limit=limit,
         )
 
-        self.__query_id = response['queryId']
+        self.__query_id = response["queryId"]
         return True
 
     def fetch_result(self, wait_time: float = 0.2) -> QueryResultResponse:
@@ -104,24 +100,24 @@ class InsightsClient:
         """
 
         if self.__query_id is None:
-            raise QueryNotYetStartError('The Query has not yet started')
+            raise QueryNotYetStartError("The Query has not yet started")
 
         results = self.__client.get_query_results(queryId=self.__query_id)
-        status = results['status']
+        status = results["status"]
 
-        if status in ['Scheduled', 'Running']:
+        if status in ["Scheduled", "Running"]:
             sleep(wait_time)
             results.update(self.fetch_result())
 
-        elif status == 'Failed':
-            raise NotFetchQueryResultError('Could not fetch the query result.')
+        elif status == "Failed":
+            raise NotFetchQueryResultError("Could not fetch the query result.")
 
-        elif status == 'Timeout':
-            raise QueryTimeoutError('The query is timeout.')
+        elif status == "Timeout":
+            raise QueryTimeoutError("The query is timeout.")
 
-        elif status == 'Cancelled':
+        elif status == "Cancelled":
             raise QueryAlreadyCancelled(
-                'The query has already been cancelled.'
+                "The query has already been cancelled."
             )
 
         return results
@@ -143,11 +139,13 @@ class InsightsClient:
 
         try:
             result = self.__client.stop_query(queryId=self.__query_id)
-            return result['success']
+            return result["success"]
         except botocore.errorfactory.ClientError as err:
-            already_stopped_msg = 'Query is not in Running or Scheduled state'
-            if err.operation_name == 'StopQuery' \
-                    and already_stopped_msg in err.__str__():
+            already_stopped_msg = "Query is not in Running or Scheduled state"
+            if (
+                err.operation_name == "StopQuery"
+                and already_stopped_msg in err.__str__()
+            ):
                 return True
             raise err
         except Exception as err:
@@ -155,9 +153,7 @@ class InsightsClient:
 
 
 def query(
-    region: str,
-    profile: str,
-    query_params: ConfigType
+    region: str, profile: str, query_params: ConfigType
 ) -> QueryResultResponse:
     """Run thread
 
@@ -171,7 +167,7 @@ def query(
     """
 
     results = {}
-    processing('Waiting', end=' ')
+    processing("Waiting", end=" ")
 
     client = InsightsClient(region, profile)
     client.start_query(**query_params)
@@ -184,13 +180,13 @@ def query(
                 try:
                     results = thread.result(timeout=0.5)
                 except confu.TimeoutError:
-                    processing('.', end='')
+                    processing(".", end="")
                 else:
                     if results:
-                        processing('.', end='\n')
+                        processing(".", end="\n")
                         break
     except KeyboardInterrupt:
         client.end_query()
-        sys.exit('\nAbort')
+        sys.exit("\nAbort")
     else:
         return results
