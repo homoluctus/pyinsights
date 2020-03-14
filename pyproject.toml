@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "pyinsights"
-version = "0.3.0"
+version = "0.3.1"
 description = "AWS CloudWatch Logs Insights is wrapped by Python"
 authors = ["homoluctus <w.slife18sy@gmail.com>"]
 license = "MIT"
