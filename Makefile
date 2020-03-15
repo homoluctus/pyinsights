@@ -16,4 +16,4 @@ mypy:
 
 .PHONY: release
 release:
-	poetry publish --build
+	poetry publish -n --build --username homoluctus
