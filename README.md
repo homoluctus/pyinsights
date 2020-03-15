@@ -66,6 +66,7 @@ pyinsights -c pyinsights.yml -p aws_profile -r region
 |-f, --format|false|Choose from json or table|
 |-p, --profile|false|AWS profile name|
 |-r, --region|false|AWS region|
+|-q, --quiet|false|Suppress progress message|
 |-v, --version|false|Show version|
 
 ## Environment Variable
