@@ -13,3 +13,7 @@ test:
 .PHONY: mypy
 mypy:
 	poetry run mypy pyinsights/ tests/
+
+.PHONY: release
+release:
+	poetry publish --build
