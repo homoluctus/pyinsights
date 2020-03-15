@@ -1,5 +1,3 @@
-import sys
-from random import randint
 from datetime import datetime, timedelta
 from typing import Dict, Union
 
@@ -75,64 +73,3 @@ def convert_string_duration_to_datetime(
     start_time = end_time - timedelta(**duration)
     duraion_map = {"start_time": start_time, "end_time": end_time}
     return duraion_map
-
-
-class Color:
-    @classmethod
-    def ansi(cls, code: Union[str, int]) -> str:
-        """Get ansi
-
-        Arguments:
-            code {Union[str, int]}
-
-        Returns:
-            str
-        """
-
-        return f"\033[{code}m"
-
-    @classmethod
-    def select_color_randomly(cls) -> str:
-        """Select a color randomly
-
-        Returns:
-            str
-        """
-
-        code = randint(1, 6)
-        return cls.ansi(30 + code)
-
-    @classmethod
-    def disabled(cls) -> str:
-        """Disable color
-
-        Returns:
-            str
-        """
-
-        return cls.ansi("0")
-
-    @classmethod
-    def bold(cls) -> str:
-        """Get bold code
-
-        Returns:
-            str
-        """
-
-        return cls.ansi("01")
-
-
-def processing(msg: str, end: str = "") -> None:
-    """Display processing on terminal
-
-    Arguments:
-        msg {str}
-
-    Keyword Arguments:
-        end {str} -- (default: {''})
-    """
-
-    processing_msg = f"{Color.bold()}{Color.select_color_randomly()}{msg}{Color.disabled()}{end}"
-    sys.stdout.write(processing_msg)
-    sys.stdout.flush()

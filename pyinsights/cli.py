@@ -1,6 +1,7 @@
 import argparse
-from typing import Any, Dict
 import sys
+from typing import Type
+from dataclasses import dataclass
 
 from pyinsights.__version__ import __version__
 from pyinsights.config import load_config
@@ -8,14 +9,20 @@ from pyinsights.query import query
 from pyinsights.formatter import format_result
 
 
-CliOptions = Dict[str, Any]
+@dataclass
+class CliOption:
+    config: str
+    result_format: str
+    profile: str
+    region: str
+    quiet: bool
 
 
-def parse_args() -> Dict[str, Any]:
+def parse_args() -> Type[CliOption]:
     """Parse arguments
 
     Returns:
-        Dict[str, Any]
+        Type[CliOption]
     """
 
     parser = argparse.ArgumentParser(
@@ -36,6 +43,7 @@ def parse_args() -> Dict[str, Any]:
         "--format",
         choices=["json", "table"],
         default="json",
+        dest="result_format",
         help='Output format "json" or "table"',
     )
 
@@ -44,28 +52,36 @@ def parse_args() -> Dict[str, Any]:
     parser.add_argument("-r", "--region", help="AWS region")
 
     parser.add_argument(
+        "-q",
+        "--quiet",
+        action="store_true",
+        help="Suppress progress spinner and messages",
+    )
+
+    parser.add_argument(
         "-v", "--version", action="version", version=__version__
     )
 
-    return vars(parser.parse_args())
+    return parser.parse_args(namespace=CliOption)
 
 
-def run(cli_options: CliOptions) -> bool:
-    config = load_config(cli_options["config"])
+def run() -> bool:
+    cli_options = parse_args()
+    config = load_config(cli_options.config)
     tmp_result = query(
-        cli_options["region"],
-        cli_options["profile"],
+        cli_options.region,
+        cli_options.profile,
         config.get_query_params(),
+        quiet=cli_options.quiet,
     )
 
     if isinstance(tmp_result, dict) and (results := tmp_result.get("results")):
-        formatted_result = format_result(cli_options["format"], results)  # type: ignore
+        formatted_result = format_result(cli_options.result_format, results)  # type: ignore
         sys.stdout.write(formatted_result)
         return True
 
     return False
 
 
-def main() -> bool:
-    args = parse_args()
-    sys.exit(run(args))
+if __name__ == "__main__":
+    sys.exit(run())

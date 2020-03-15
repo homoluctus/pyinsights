@@ -3,9 +3,7 @@
 import os
 import sys
 from time import sleep
-import concurrent.futures as confu
-from concurrent.futures.thread import ThreadPoolExecutor
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, cast
 
 import boto3
 import botocore.errorfactory
@@ -16,8 +14,9 @@ from pyinsights.exceptions import (
     QueryAlreadyCancelled,
     QueryNotYetStartError,
     QueryTimeoutError,
+    QueryUnknownError,
 )
-from pyinsights.helper import processing
+from pyinsights.progress import Progress
 
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
@@ -85,18 +84,18 @@ class InsightsClient:
         self.__query_id = response["queryId"]
         return True
 
-    def fetch_result(self, wait_time: float = 0.2) -> QueryResultResponse:
+    def fetch_result(self) -> Optional[QueryResultResponse]:
         """Fetch the query result
-
-        Keyword Arguments:
-            wait_time {float}
-                -- wait time when query status is `Scheduled` or `Running`.
 
         Raises:
             QueryNotYetStartError
+            NotFetchQueryResultError
+            QueryTimeoutError
+            QueryAlreadyCancelled
+            QueryUnknownError
 
         Returns:
-            results {QueryResultResponse}
+            Optional[QueryResultResponse]
         """
 
         if self.__query_id is None:
@@ -106,8 +105,7 @@ class InsightsClient:
         status = results["status"]
 
         if status in ["Scheduled", "Running"]:
-            sleep(wait_time)
-            results.update(self.fetch_result())
+            results = None
 
         elif status == "Failed":
             raise NotFetchQueryResultError("Could not fetch the query result.")
@@ -119,6 +117,9 @@ class InsightsClient:
             raise QueryAlreadyCancelled(
                 "The query has already been cancelled."
             )
+
+        elif status == "Unknown":
+            raise QueryUnknownError("The query occurs unknown error.")
 
         return results
 
@@ -153,40 +154,57 @@ class InsightsClient:
 
 
 def query(
-    region: str, profile: str, query_params: ConfigType
+    region: str,
+    profile: str,
+    query_params: ConfigType,
+    quiet: bool = False,
+    interval: float = 0.05,
 ) -> QueryResultResponse:
-    """Run thread
+    """Run query to CloudWath Logs Insights
 
     Arguments:
         region {str}
         profile {str}
         query_params {ConfigType}
 
-    Returns:
-        results = QueryResultResponse
-    """
+    Keyword Arguments:
+        quiet {bool} (default: {False})
+        interval {float} (default: {0.05})
 
-    results = {}
-    processing("Waiting", end=" ")
+    Returns:
+        QueryResultResponse
+    """
 
     client = InsightsClient(region, profile)
     client.start_query(**query_params)
 
-    try:
-        with ThreadPoolExecutor(max_workers=1) as executor:
-            thread = executor.submit(client.fetch_result)
+    counter = 0
+    progress = Progress(
+        processing_msg="Search for matching logs...",
+        end_msg="Search completed!",
+        quiet=quiet,
+    )
 
-            while True:
-                try:
-                    results = thread.result(timeout=0.5)
-                except confu.TimeoutError:
-                    processing(".", end="")
-                else:
-                    if results:
-                        processing(".", end="\n")
-                        break
+    try:
+        while True:
+            progress.show(counter)
+
+            if (results := client.fetch_result()) is not None:
+                progress.done()
+                return cast(QueryResultResponse, results)
+
+            counter += 1
+            sleep(interval)
+
+    except (
+        QueryNotYetStartError,
+        NotFetchQueryResultError,
+        QueryTimeoutError,
+        QueryAlreadyCancelled,
+        QueryUnknownError,
+    ) as err:
+        sys.exit(err)
+
     except KeyboardInterrupt:
         client.end_query()
         sys.exit("\nAbort")
-    else:
-        return results
