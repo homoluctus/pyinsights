@@ -14,6 +14,10 @@ class QueryAlreadyCancelled(Exception):
     """Raises if the query has already been cancelled"""
 
 
+class QueryUnknownError(Exception):
+    """Raises if the query status is Unknown"""
+
+
 class ConfigInvalidSyntaxError(Exception):
     """Raises error if the configuration is invalid syntax"""
 

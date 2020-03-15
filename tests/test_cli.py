@@ -1,4 +1,5 @@
 import os
+import sys
 
 import pytest
 
@@ -15,11 +16,16 @@ REGION_FOR_TEST = os.getenv("REGION_FOR_TEST", "")
     "format_type, expectation", (("json", True), ("table", True))
 )
 def test_format_options(format_type: str, expectation: bool) -> None:
-    common_kwargs = {
-        "profile": PROFILE_FOR_TEST,
-        "region": REGION_FOR_TEST,
-        "config": CONFIG_FILEPATH_FOR_TEST,
-    }
-    common_kwargs["format"] = format_type
-    result = run(common_kwargs)
+    sys.argv = [
+        "pyinsights",
+        "-r",
+        REGION_FOR_TEST,
+        "-p",
+        PROFILE_FOR_TEST,
+        "-c",
+        CONFIG_FILEPATH_FOR_TEST,
+        "-f",
+        format_type,
+    ]
+    result = run()
     assert result is expectation

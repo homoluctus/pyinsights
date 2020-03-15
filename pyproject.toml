@@ -46,7 +46,7 @@ exclude = '''
 '''
 
 [tool.poetry.scripts]
-pyinsights = "pyinsights.cli:main"
+pyinsights = "pyinsights.cli:run"
 
 [build-system]
 requires = ["poetry>=0.12"]
