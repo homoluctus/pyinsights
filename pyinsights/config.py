@@ -12,6 +12,7 @@ from pyinsights.exceptions import (
     ConfigNotFoundError,
     ConfigVersionUnknownError,
     InvalidVersionError,
+    InvalidQueryStringError,
 )
 from pyinsights.helper import (
     convert_to_epoch,
@@ -21,6 +22,8 @@ from pyinsights.helper import (
 
 ConfigType = Dict[str, Any]
 SchemaType = Dict[str, Any]
+
+QUERY_COMMAND_DELIMETER = " | "
 
 
 @dataclass
@@ -52,12 +55,52 @@ class ConfigFile:
         }
         return duration_epoch
 
+    @classmethod
+    def _validate_query_string(cls, query: str) -> None:
+        """Validate query string if array type specified
+
+        Arguments:
+            query {str}
+
+        Raises:
+            InvalidQueryStringError: [description]
+
+        Returns:
+            None
+        """
+
+        if query.startswith("|") or query.endswith("|"):
+            raise InvalidQueryStringError(
+                "No pipe required if array type specified"
+            )
+
+    def format_query_string(self) -> None:
+        if isinstance(self.content["query_string"], str):
+            return
+
+        for query in self.content["query_string"]:
+            self._validate_query_string(query)
+
+        self.content["query_string"] = QUERY_COMMAND_DELIMETER.join(
+            self.content["query_string"]
+        )
+
     def get_query_params(self) -> ConfigType:
+        """Get query parameters
+
+        Returns:
+            ConfigType
+        """
+
+        self.format_query_string()
+
         params = self.content.copy()
-        new_duration = self.convert_duration()
         del params["version"]
+
+        new_duration = self.convert_duration()
         del params["duration"]
         params.update(new_duration)
+
         return params
 
 

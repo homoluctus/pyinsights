@@ -1,0 +1,9 @@
+version: '1.0'
+log_group_name:
+  - '/ecs/sample'
+  - '/lambda/sample'
+query_string: 'field @message | fileter @message like /WARN/'
+duration:
+  start_time: '2019-12-27 00:00:00'
+  end_time: '2019-12-27 01:00:00'
+limit: 10

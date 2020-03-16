@@ -17,7 +17,20 @@
       },
       "query_string": {
         "description": "The query string to insights CloudWatch Logs.",
-        "type": "string"
+        "oneOf": [
+          {
+            "description": "Include pipe",
+            "type": "string"
+          },
+          {
+            "description": "Not include pipe",
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "uniqueItems": true
+          }
+        ]
       },
       "duration": {
         "oneOf": [

@@ -10,7 +10,7 @@ A CLI tool To query CloudWatch Logs Insights.
 
 ![usage2](https://raw.githubusercontent.com/homoluctus/pyinsights/master/images/usage2.png)
 
-# ToC
+**ToC**
 
 <!-- TOC depthFrom:2 -->
 
@@ -18,6 +18,13 @@ A CLI tool To query CloudWatch Logs Insights.
   - [Write Configuration](#write-configuration)
   - [Execute command](#execute-command)
 - [Configuration](#configuration)
+  - [version](#version)
+  - [log_group_name](#log_group_name)
+  - [query_string](#query_string)
+  - [duration](#duration)
+    - [type: string](#type-string)
+    - [type: object](#type-object)
+  - [limit](#limit)
 - [CLI Options](#cli-options)
 - [Environment Variable](#environment-variable)
 
@@ -48,15 +55,92 @@ pyinsights -c pyinsights.yml -p aws_profile -r region
 
 ## Configuration
 
-|Parameter|Type|Required|Description|
-|:--:|:--:|:--:|:--|
-|version|string|true|Choose configuration version from ['1.0']|
-|log_group_name|array|true|Target log group names to query|
-|query_string|string|true|Pattern to query|
-|duration|string or object|true||
-||string||Specify hours, minutes or seconds from now<br>Unit:<br>hours = `h`,<br>minutes = `m`,<br>seconds = `s`,<br>days = `d`,<br>weeks = `w`|
-||object||Specify `start_time` and `end_time`<br>Datetime format must be `YYYY-MM-DD HH:MM:SS`|
-|limit|integer|false|The number of log to fetch|
+### version
+
+|Type|Required|
+|:--:|:--:|
+|string|true|
+
+Choose configuration version from ['1.0']
+
+### log_group_name
+
+|Type|Required|
+|:--:|:--:|
+|array|true|
+
+Target log group names to query
+
+### query_string
+
+|Type|Required|
+|:--:|:--:|
+|string or array|true|
+
+Specify CloudWatch Logs Insights query commands.
+Please see [CloudWatch Logs Insights Query Syntax](https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html).
+
+:warning: If query_string type is array, Unix-style pipe `|` is not required. Execute in order from the top.
+
+ex)
+
+```yml
+query_string:
+  - 'field @message'
+  - 'fileter @message like /WARN/'
+```
+
+Equal to
+
+```yml
+query_string: 'field @message | fileter @message like /WARN/'
+```
+
+### duration
+
+|Type|Required|
+|:--:|:--:|
+|string or object|true|
+
+#### type: string
+
+Specify weeks, days, hours, minutes or seconds unit.
+
+```
+weeks = w
+days = d
+hours = h
+minutes = m
+seconds = s
+```
+
+ex)
+
+```yml
+duration: 10h
+```
+
+#### type: object
+
+Specify `start_time` and `end_time`.
+The format must be `YYYY-MM-DD HH:MM:SS`.
+
+ex)
+
+```yml
+duration:
+  start_time: '2020-01-01 00:00:00'
+  end_time: '2020-01-01 01:00:00'
+```
+
+### limit
+
+|Type|Required|
+|:--:|:--:|
+|integer|false|
+
+The number of log to fetch.
+Of course, you can specify `limit` in [query_string](#query_string).
 
 ## CLI Options
 
