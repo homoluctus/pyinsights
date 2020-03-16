@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from pyinsights.config import load_config, load_schema, validate, ConfigFile
+from pyinsights.config import load_config, load_schema, validate
 from pyinsights.exceptions import (
     ConfigInvalidSyntaxError,
     ConfigNotFoundError,
@@ -18,18 +18,6 @@ BASE_DIR = Path(__file__).parent
 
 
 @pytest.mark.parametrize(
-    "filepath, expectation",
-    (
-        (f"{BASE_DIR}/fixtures/correct/config1.yml", does_not_raise()),
-        ("invalid", pytest.raises(ConfigNotFoundError)),
-    ),
-)
-def test_load_config(filepath: str, expectation: Any) -> None:
-    with expectation:
-        assert isinstance(load_config(filepath), ConfigFile) is True
-
-
-@pytest.mark.parametrize(
     "version, expectation",
     (
         ("1.0", does_not_raise()),
@@ -41,26 +29,25 @@ def test_load_schema(version: str, expectation: Any) -> None:
         assert isinstance(load_schema(version), dict) is True
 
 
-def test_valid_config() -> None:
-    config = load_config(f"{BASE_DIR}/fixtures/correct/config1.yml")
-    result = validate(config.content, config.version)
-    assert result is True
-
-
 @pytest.mark.parametrize(
-    "key, invalid_value, exception",
+    "filename, expectation",
     (
-        ("version", "invalid", InvalidVersionError),
-        ("test", "this is test", ConfigInvalidSyntaxError),
+        ("correct/config1.yml", does_not_raise()),
+        ("correct/config2.yml", does_not_raise()),
+        ("correct/config3.yml", does_not_raise()),
+        ("invalid/version.yml", pytest.raises(InvalidVersionError)),
+        (
+            "invalid/additional_property.yml",
+            pytest.raises(ConfigInvalidSyntaxError),
+        ),
+        ("non-existence", pytest.raises(ConfigNotFoundError)),
     ),
 )
-def test_invalid_config(
-    key: str, invalid_value: str, exception: Exception
-) -> None:
-    config = load_config(f"{BASE_DIR}/fixtures/correct/config1.yml")
-    config.content[key] = invalid_value
-    with pytest.raises(exception):
-        validate(config.content, config.version)
+def test_load_config(filename: str, expectation: Any) -> None:
+    with expectation:
+        config = load_config(f"{BASE_DIR}/fixtures/{filename}")
+        result = validate(config.content, config.version)
+        assert result is True
 
 
 @pytest.mark.parametrize(
