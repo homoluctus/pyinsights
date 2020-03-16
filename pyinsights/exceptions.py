@@ -36,3 +36,7 @@ class InvalidVersionError(Exception):
 
 class InvalidDurationError(Exception):
     """Raises error if the duration parameter is not number"""
+
+
+class InvalidQueryStringError(Exception):
+    """Raises error if query string format is invalid"""
