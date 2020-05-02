@@ -40,3 +40,7 @@ class InvalidDurationError(Exception):
 
 class InvalidQueryStringError(Exception):
     """Raises error if query string format is invalid"""
+
+
+class OutputFileNotFoundError(Exception):
+    """Raises error if filepath to output the result is not found"""

@@ -1,5 +1,4 @@
 from typing import Any
-from pathlib import Path
 
 import pytest
 
@@ -11,10 +10,7 @@ from pyinsights.exceptions import (
     InvalidQueryStringError,
 )
 
-from tests.utils import does_not_raise
-
-
-BASE_DIR = Path(__file__).parent
+from tests.utils import BASE_DIR, does_not_raise
 
 
 @pytest.mark.parametrize(

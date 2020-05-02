@@ -1,31 +1,23 @@
-import os
-import sys
+from typing import Any
 
 import pytest
 
-from pyinsights.cli import run
+from pyinsights.cli.writer import Writer
+from pyinsights.exceptions import OutputFileNotFoundError
+
+from tests.utils import BASE_DIR, does_not_raise
 
 
-CONFIG_FILEPATH_FOR_TEST = os.getenv("CONFIG_FILEPATH_FOR_TEST", "")
-PROFILE_FOR_TEST = os.getenv("PROFILE_FOR_TEST", "")
-REGION_FOR_TEST = os.getenv("REGION_FOR_TEST", "")
-
-
-@pytest.mark.skipif(CONFIG_FILEPATH_FOR_TEST == "", reason="Use AWS Resource")
 @pytest.mark.parametrize(
-    "format_type, expectation", (("json", True), ("table", True))
+    "filepath, raises",
+    (
+        (None, does_not_raise()),
+        (f"{BASE_DIR}/fixtures/writer.json", does_not_raise(),),
+        (1, pytest.raises(ValueError)),
+        ("/invalid/invalid.json", pytest.raises(OutputFileNotFoundError)),
+    ),
 )
-def test_format_options(format_type: str, expectation: bool) -> None:
-    sys.argv = [
-        "pyinsights",
-        "-r",
-        REGION_FOR_TEST,
-        "-p",
-        PROFILE_FOR_TEST,
-        "-c",
-        CONFIG_FILEPATH_FOR_TEST,
-        "-f",
-        format_type,
-    ]
-    result = run()
-    assert result is expectation
+def test_writer(filepath: Any, raises: Any) -> None:
+    with raises:
+        writer = Writer.from_filename(filepath)
+        assert writer.writer.writable() is True
