@@ -45,7 +45,7 @@ def test_load_schema(version: str, expectation: Any) -> None:
 )
 def test_load_config(filename: str, expectation: Any) -> None:
     with expectation:
-        config = load_config(f"{BASE_DIR}/fixtures/{filename}")
+        config = load_config(f"{BASE_DIR}/fixtures/config/{filename}")
         result = validate(config.content, config.version)
         assert result is True
 
@@ -61,7 +61,7 @@ def test_load_config(filename: str, expectation: Any) -> None:
     ),
 )
 def test_format_query_string(filename: str, expectation: Any) -> None:
-    conf = load_config(f"{BASE_DIR}/fixtures/{filename}")
+    conf = load_config(f"{BASE_DIR}/fixtures/config/{filename}")
 
     with expectation:
         conf.format_query_string()
