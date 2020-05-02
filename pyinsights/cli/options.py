@@ -1,21 +1,18 @@
 import argparse
-import sys
 from typing import Type
 from dataclasses import dataclass
 
 from pyinsights.__version__ import __version__
-from pyinsights.config import load_config
-from pyinsights.query import query
-from pyinsights.formatter import format_result
 
 
 @dataclass
 class CliOption:
     config: str
-    result_format: str
+    fmt: str
     profile: str
     region: str
     quiet: bool
+    output: str
 
 
 def parse_args() -> Type[CliOption]:
@@ -43,13 +40,15 @@ def parse_args() -> Type[CliOption]:
         "--format",
         choices=["json", "table"],
         default="json",
-        dest="result_format",
+        dest="fmt",
         help='Output format "json" or "table"',
     )
 
     parser.add_argument("-p", "--profile", help="AWS profile name")
 
     parser.add_argument("-r", "--region", help="AWS region")
+
+    parser.add_argument("-o", "--output", help="Output the result to file")
 
     parser.add_argument(
         "-q",
@@ -63,25 +62,3 @@ def parse_args() -> Type[CliOption]:
     )
 
     return parser.parse_args(namespace=CliOption)
-
-
-def run() -> bool:
-    cli_options = parse_args()
-    config = load_config(cli_options.config)
-    tmp_result = query(
-        cli_options.region,
-        cli_options.profile,
-        config.get_query_params(),
-        quiet=cli_options.quiet,
-    )
-
-    if isinstance(tmp_result, dict) and (results := tmp_result.get("results")):
-        formatted_result = format_result(cli_options.result_format, results)  # type: ignore
-        sys.stdout.write(formatted_result)
-        return True
-
-    return False
-
-
-if __name__ == "__main__":
-    sys.exit(run())

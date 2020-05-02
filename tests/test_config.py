@@ -1,5 +1,4 @@
 from typing import Any
-from pathlib import Path
 
 import pytest
 
@@ -11,10 +10,7 @@ from pyinsights.exceptions import (
     InvalidQueryStringError,
 )
 
-from tests.utils import does_not_raise
-
-
-BASE_DIR = Path(__file__).parent
+from tests.utils import BASE_DIR, does_not_raise
 
 
 @pytest.mark.parametrize(
@@ -45,7 +41,7 @@ def test_load_schema(version: str, expectation: Any) -> None:
 )
 def test_load_config(filename: str, expectation: Any) -> None:
     with expectation:
-        config = load_config(f"{BASE_DIR}/fixtures/{filename}")
+        config = load_config(f"{BASE_DIR}/fixtures/config/{filename}")
         result = validate(config.content, config.version)
         assert result is True
 
@@ -61,7 +57,7 @@ def test_load_config(filename: str, expectation: Any) -> None:
     ),
 )
 def test_format_query_string(filename: str, expectation: Any) -> None:
-    conf = load_config(f"{BASE_DIR}/fixtures/{filename}")
+    conf = load_config(f"{BASE_DIR}/fixtures/config/{filename}")
 
     with expectation:
         conf.format_query_string()

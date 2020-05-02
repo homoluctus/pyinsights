@@ -151,6 +151,7 @@ Of course, you can specify `limit` in [query_string](#query_string).
 |-p, --profile|false|AWS profile name|
 |-r, --region|false|AWS region|
 |-q, --quiet|false|Suppress progress message|
+|-o, --output|false|Specify the filename to output the query result|
 |-v, --version|false|Show version|
 
 ## Environment Variable
