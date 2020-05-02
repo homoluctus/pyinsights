@@ -23,8 +23,9 @@ jobs:
 
       - name: Release
         env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.pyinsights_uploader }}
-        run: make release
+          POETRY_USERNAME: ${{ secrets.POETRY_USERNAME }}
+          POETRY_PASSWORD: ${{ secrets.POETRY_PASSWORD }}
+        run: make release username=$POETRY_USERNAME password=$POETRY_PASSWORD
 
   github:
     name: Release to GitHub
